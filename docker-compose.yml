@@ -1,0 +1,38 @@
+version: '2'
+services:
+  buildbot:
+    image: buildbot/buildbot-master:master
+    env_file:
+        - .env
+    external_links:
+      - postgres
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./master.cfg:/var/lib/buildbot/master.cfg:ro
+
+  py36:
+    image: "registry.zero.rdc.li/zero/buildbot-worker:3.6.1"
+    environment:
+        BUILDMASTER: buildbot
+        BUILDMASTER_PORT: 9989
+        WORKERNAME: py36
+        WORKERPASS: password
+        WORKER_ENVIRONMENT_BLACKLIST: DOCKER_BUILDBOT* BUILDBOT_ENV_* BUILDBOT_1* WORKER_ENVIRONMENT_BLACKLIST
+
+  py35:
+    image: "registry.zero.rdc.li/zero/buildbot-worker:3.5.3"
+    environment:
+        BUILDMASTER: buildbot
+        BUILDMASTER_PORT: 9989
+        WORKERNAME: py35
+        WORKERPASS: password
+        WORKER_ENVIRONMENT_BLACKLIST: DOCKER_BUILDBOT* BUILDBOT_ENV_* BUILDBOT_1* WORKER_ENVIRONMENT_BLACKLIST
+
+    links:
+        - buildbot
+
+networks:
+  default:
+    external:
+      name: zero
